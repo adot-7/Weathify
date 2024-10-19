@@ -16,10 +16,10 @@
     }
 
     .container {
-      background-color: rgba(255, 255, 255, 0.7); /* White background with opacity */
+      background-color: rgba(255, 255, 255, 0.2); /* White background with opacity */
       backdrop-filter: blur(10px); /* Blur effect */
-      padding: 50px;
-      border-radius: 10px;
+      padding: 200px;
+      border-radius: 15px;
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
       text-align: center;
       width: 100%;
@@ -89,7 +89,7 @@
   </div>
 
   <script>
-    const apiKey = 'e1b292964b3c86ad361260f80c9496e0'; // Your OpenWeatherMap API key
+    const apiKey = 'e1b292964b3c86ad361260f80c9496e0'; // Your OpenWeatherMap API key, I used a random one I found on github lol 
 
     // Function to automatically detect location and fetch weather data
     window.onload = () => {
@@ -107,7 +107,7 @@
       setRandomGradientBackground();
     };
 
-    // Function to get weather by location (latitude and longitude)
+    // Function to get weather by location using the browser pop up
     function getWeatherByLocation(lat, lon) {
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
 
