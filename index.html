@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: background 1s ease; /* Smooth transition for background changes */
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.7); /* White background with opacity */
+      backdrop-filter: blur(10px); /* Blur effect */
+      padding: 50px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .weather-info {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+
+    .icon {
+      width: 100px;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Weather App</h1>
+    <input type="text" id="cityInput" placeholder="Enter city name">
+    <button onclick="getWeatherByCity()">Search</button>
+
+    <div class="weather-info" id="weatherInfo">
+      <p id="location"></p>
+      <img id="weatherIcon" class="icon" alt="Weather Icon">
+      <p id="description"></p>
+      <p id="temperature"></p>
+      <p id="humidity"></p>
+      <p id="windSpeed"></p>
+    </div>
+
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    const apiKey = 'e1b292964b3c86ad361260f80c9496e0'; // Your OpenWeatherMap API key
+
+    // Function to automatically detect location and fetch weather data
+    window.onload = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          getWeatherByLocation(lat, lon);
+        });
+      } else {
+        document.getElementById('error').textContent = 'Geolocation is not supported by this browser.';
+      }
+
+      // Set initial random gradient background
+      setRandomGradientBackground();
+    };
+
+    // Function to get weather by location (latitude and longitude)
+    function getWeatherByLocation(lat, lon) {
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => displayWeather(data))
+        .catch(error => {
+          document.getElementById('error').textContent = 'Error fetching weather data.';
+        });
+    }
+
+    // Function to get weather by city name
+    function getWeatherByCity() {
+      const city = document.getElementById('cityInput').value;
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          displayWeather(data);
+          setRandomGradientBackground(); // Change background when a city is searched
+        })
+        .catch(error => {
+          document.getElementById('error').textContent = 'Please look for cities on Earth, not Mars.';
+        });
+    }
+
+    // Function to generate a random color in hex format
+    function getRandomColor() {
+      const letters = '0123456789ABCDEF';
+      let color = '#';
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    // Function to set a random linear gradient background
+    function setRandomGradientBackground() {
+      const color1 = getRandomColor();
+      const color2 = getRandomColor();
+      document.body.style.background = `linear-gradient(to right, ${color1}, ${color2})`;
+    }
+
+    // Displaying weather data
+    function displayWeather(data) {
+      document.getElementById('error').textContent = '';
+      const location = data.name + ', ' + data.sys.country;
+      const description = data.weather[0].description;
+      const temperature = `Temperature: ${data.main.temp}°C`;
+      const humidity = `Humidity: ${data.main.humidity}%`;
+      const windSpeed = `Wind Speed: ${data.wind.speed} m/s`;
+      const iconUrl = `http://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+
+      document.getElementById('location').textContent = location;
+      document.getElementById('description').textContent = description;
+      document.getElementById('temperature').textContent = temperature;
+      document.getElementById('humidity').textContent = humidity;
+      document.getElementById('windSpeed').textContent = windSpeed;
+      document.getElementById('weatherIcon').src = iconUrl;
+    }
+  </script>
+
+</body>
+</html>
