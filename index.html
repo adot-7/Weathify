@@ -1,3 +1,4 @@
+<!--
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -159,6 +160,226 @@
       const description = data.weather[0].description;
       const temperature = `Temperature: ${data.main.temp}°C`;
       const humidity = `Humidity: ${data.main.humidity}%`;
+      const windSpeed = `Wind Speed: ${data.wind.speed} m/s`;
+      const iconUrl = `http://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
+
+      document.getElementById('location').textContent = location;
+      document.getElementById('description').textContent = description;
+      document.getElementById('temperature').textContent = temperature;
+      document.getElementById('humidity').textContent = humidity;
+      document.getElementById('windSpeed').textContent = windSpeed;
+      document.getElementById('weatherIcon').src = iconUrl;
+    }
+  </script>
+
+</body>
+</html>
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> <!-- Include Tailwind CSS -->
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden; /* Prevent scrollbars */
+      background: linear-gradient(270deg, #ff008c, #fc6767, #fcb045, #ff008c); /* Initial gradient */
+      background-size: 400% 400%; /* Makes the gradient bigger for smooth flow */
+      animation: gradientFlow 15s ease infinite; /* Animation effect */
+    }
+
+    @keyframes gradientFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.3); /* Slightly opaque background for contrast */
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      padding: 2rem;
+      width: 80%; /* Width of the container */
+      max-width: 1000px; /* Maximum width */
+      display: flex; /* Flex for layout */
+      flex-direction: column; /* Column layout */
+      align-items: center; /* Center items */
+    }
+
+    h1 {
+      font-size: 2.5rem; /* Increased font size for the title */
+      color: #333; /* Darker color for better readability */
+    }
+
+    .input-group {
+      display: flex; /* Flex for input and button */
+      width: 100%;
+      margin: 1rem 0;
+      gap: 1rem; /* Space between input and button */
+    }
+
+    input[type="text"] {
+      flex: 1; /* Input takes available space */
+      padding: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      transition: border-color 0.3s; /* Smooth border transition */
+    }
+
+    input[type="text"]:focus {
+      border-color: #3498db; /* Border color on focus */
+      outline: none; /* Remove outline */
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: background-color 0.3s; /* Smooth background transition */
+    }
+
+    button:hover {
+      background-color: #2980b9; /* Darker blue on hover */
+    }
+
+    .info-container {
+      display: grid; /* Grid layout for info */
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive grid */
+      gap: 1.5rem; /* Space between items */
+      width: 100%;
+      margin-top: 1rem; /* Space above the info section */
+    }
+
+    .info-block {
+      background-color: rgba(255, 255, 255, 0.4); /* Light background for info blocks */
+      border-radius: 15px;
+      padding: 1.5rem; /* Padding for info blocks */
+      text-align: center; /* Center text in blocks */
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+      transition: transform 0.3s; /* Smooth transformation */
+    }
+
+    .info-block:hover {
+      transform: translateY(-4px); /* Lift effect on hover */
+    }
+
+    .icon {
+      width: 70px; /* Adjusted icon size */
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Weather App</h1>
+    
+    <div class="input-group">
+      <input type="text" id="cityInput" placeholder="Enter city name">
+      <button onclick="getWeatherByCity()">Search</button>
+    </div>
+
+    <div class="info-container">
+      <div class="info-block">
+        <p id="location" class="text-lg font-semibold"></p>
+        <div class="flex justify-center">
+          <img id="weatherIcon" class="icon mx-auto" alt="Weather Icon">
+        </div>
+        <p id="description" class="text-md"></p>
+      </div>
+
+      <div class="info-block">
+        <h2 class="text-xl font-semibold">Temperature</h2>
+        <p id="temperature" class="text-lg"></p>
+      </div>
+
+      <div class="info-block">
+        <h2 class="text-xl font-semibold">Humidity</h2>
+        <p id="humidity" class="text-lg"></p>
+      </div>
+
+      <div class="info-block">
+        <h2 class="text-xl font-semibold">Wind Speed</h2>
+        <p id="windSpeed" class="text-lg"></p>
+      </div>
+    </div>
+
+    <div class="error" id="error"></div>
+  </div>
+
+  <script>
+    const apiKey = 'e1b292964b3c86ad361260f80c9496e0'; // Your OpenWeatherMap API key
+
+    // Function to automatically detect location and fetch weather data
+    window.onload = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          getWeatherByLocation(lat, lon);
+        });
+      } else {
+        document.getElementById('error').textContent = 'Geolocation is not supported by this browser.';
+      }
+    };
+
+    // Function to get weather by location (latitude and longitude)
+    function getWeatherByLocation(lat, lon) {
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => displayWeather(data))
+        .catch(error => {
+          document.getElementById('error').textContent = 'Error fetching weather data.';
+        });
+    }
+
+    // Function to get weather by city name
+    function getWeatherByCity() {
+      const city = document.getElementById('cityInput').value;
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          displayWeather(data);
+        })
+        .catch(error => {
+          document.getElementById('error').textContent = 'Please look for cities on Earth, not Mars.';
+        });
+    }
+
+    // Displaying weather data
+    function displayWeather(data) {
+      document.getElementById('error').textContent = '';
+      const location = data.name + ', ' + data.sys.country;
+      const description = data.weather[0].description;
+      const temperature = `${data.main.temp}°C`;
+      const humidity = `${data.main.humidity}%`;
       const windSpeed = `Wind Speed: ${data.wind.speed} m/s`;
       const iconUrl = `http://openweathermap.org/img/wn/${data.weather[0].icon}.png`;
 
